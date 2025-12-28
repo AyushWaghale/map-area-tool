@@ -3,20 +3,38 @@ import { useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet-draw";
 
-const DrawControls = () => {
+const DrawControls = ({ featureGroupRef, onShapeCreated }) => {
   const map = useMap();
 
   useEffect(() => {
-    const drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+    if (!featureGroupRef.current) return;
 
     const drawControl = new L.Control.Draw({
       position: "topright",
+
       edit: {
-        featureGroup: drawnItems,
+        featureGroup: featureGroupRef.current,
+        remove: true,
+        edit: false, 
       },
+
       draw: {
-        polyline: false,
+        polygon: {
+          allowIntersection: false,
+          showArea: true,
+          shapeOptions: {
+            color: "#2563eb",
+            weight: 3,
+            fillOpacity: 0.2,
+          },
+        },
+        polyline: {
+          shapeOptions: {
+            color: "#0f172a",
+            weight: 3,
+          },
+        },
+
         marker: false,
         circlemarker: false,
       },
@@ -24,20 +42,16 @@ const DrawControls = () => {
 
     map.addControl(drawControl);
 
-    // Event: shape created
     map.on(L.Draw.Event.CREATED, (event) => {
-      const layer = event.layer;
-      drawnItems.addLayer(layer);
-
-      // TEMP: log shape info (important for next parts)
-      console.log("Shape created:", event.layerType, layer);
+      const { layer, layerType } = event;
+      featureGroupRef.current.addLayer(layer);
+      onShapeCreated(layerType, layer);
     });
 
     return () => {
       map.removeControl(drawControl);
-      map.removeLayer(drawnItems);
     };
-  }, [map]);
+  }, [map, featureGroupRef, onShapeCreated]);
 
   return null;
 };
