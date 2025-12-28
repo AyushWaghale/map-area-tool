@@ -4,56 +4,60 @@ import L from "leaflet";
 import "leaflet-draw";
 
 const DrawControls = ({ featureGroupRef, onShapeCreated }) => {
-  const map = useMap();
+    const map = useMap();
 
-  useEffect(() => {
-    if (!featureGroupRef.current) return;
+    useEffect(() => {
+        if (!featureGroupRef.current) return;
 
-    const drawControl = new L.Control.Draw({
-      position: "topright",
+        const drawControl = new L.Control.Draw({
+            position: "topright",
 
-      edit: {
-        featureGroup: featureGroupRef.current,
-        remove: true,
-        edit: false, 
-      },
+            edit: {
+                featureGroup: featureGroupRef.current,
+                remove: true,
+                edit: false,
+            },
 
-      draw: {
-        polygon: {
-          allowIntersection: false,
-          showArea: true,
-          shapeOptions: {
-            color: "#2563eb",
-            weight: 3,
-            fillOpacity: 0.2,
-          },
-        },
-        polyline: {
-          shapeOptions: {
-            color: "#0f172a",
-            weight: 3,
-          },
-        },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true,
+                    shapeOptions: {
+                        color: "#2563eb",
+                        weight: 3,
+                        fillOpacity: 0.2,
+                    },
+                },
 
-        marker: false,
-        circlemarker: false,
-      },
-    });
+                polyline: {
+                    shapeOptions: {
+                        color: "#0f172a",
+                        weight: 3,
+                    },
+                },
 
-    map.addControl(drawControl);
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false,
+            },
 
-    map.on(L.Draw.Event.CREATED, (event) => {
-      const { layer, layerType } = event;
-      featureGroupRef.current.addLayer(layer);
-      onShapeCreated(layerType, layer);
-    });
+        });
 
-    return () => {
-      map.removeControl(drawControl);
-    };
-  }, [map, featureGroupRef, onShapeCreated]);
+        map.addControl(drawControl);
 
-  return null;
+        map.on(L.Draw.Event.CREATED, (event) => {
+            const { layer, layerType } = event;
+            featureGroupRef.current.addLayer(layer);
+            onShapeCreated(layerType, layer);
+        });
+
+        return () => {
+            map.removeControl(drawControl);
+        };
+    }, [map, featureGroupRef, onShapeCreated]);
+
+    return null;
 };
 
 export default DrawControls;
